@@ -1,7 +1,8 @@
 [package]
-name = "chapter-one"
+name = "chapter-two"
 version = "0.2.0"
 authors = ["Justin Moore <jmoore5268@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+cgmath = "0.17.0"
