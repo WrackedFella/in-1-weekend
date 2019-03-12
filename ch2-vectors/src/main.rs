@@ -9,11 +9,9 @@ fn main() -> std::io::Result<()> {
     let ny: f32 = 100.0;
     let mut j: f32 = ny - 1.0;
     let mut file_contents = format!("P3\n{} {}\n255\n", nx, ny);
-    while j >= 0.0
-    {
+    while j >= 0.0 {
         let mut i: f32 = 0.0;
-        while i < nx
-        {
+        while i < nx {
             let r: f32 = i / nx;
             let g: f32 = j / ny; 
             let b: f32 = 0.2;
