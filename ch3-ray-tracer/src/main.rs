@@ -38,24 +38,11 @@ fn main() -> std::io::Result<()> {
             let uh: Vector3<f32> = u*horizontal;
             let vv: Vector3<f32> = v*vertical;
             let r = Ray::new(origin, lower_left_corner + uh + vv);
-            let mut shadow_r = Ray::new(origin, lower_left_corner + uh + vv);
             let col = color(r);
             let ir: f32 = 255.99 * col.x;
             let ig: f32 = 255.99 * col.y;
             let ib: f32 = 255.99 * col.z;
             
-                
-            if i == 10.0 && j == 20.0 {
-                println!("Value of u: {}", u);
-                println!("Value of v: {}", v);
-                println!("Value of u*horizontal x: {}, y: {}", uh.x, uh.y);
-                println!("Value of v*vertical x: {}, y: {}", vv.x, vv.y);
-                let x = lower_left_corner + uh + vv;
-                println!("Value of ray destination x: {}, y: {}", x.x, x.y);
-                let unit_direction: Vector3<f32> = unit_vector(shadow_r.direction());
-                println!("Value of Unit Vector x: {}, y: {}", unit_direction.x, unit_direction.y);
-            }
-
             file_contents = file_contents + &format!("{} {} {}\n", ir, ig, ib);
             i = i + 1.0f32;
         }
