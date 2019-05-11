@@ -1,0 +1,9 @@
+[package]
+name = "chapter-two"
+version = "0.2.0"
+authors = ["Justin Moore <jmoore5268@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+raytracing = { path = "lib/raytracing" }
+cgmath = "0.17.0"
