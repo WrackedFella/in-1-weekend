@@ -1,9 +1,10 @@
 extern crate raytracing;
 extern crate cgmath;
 
-use raytracing::Ray;
+use raytracing::*;
 use std::fs::File;
 use std::io::prelude::*;
+use std::rc::Rc;
 use cgmath::Vector3;
 
 fn unit_vector(v: Vector3<f32>) -> Vector3<f32> {
@@ -28,15 +29,35 @@ fn hit_sphere(center: Vector3<f32>, radius: f32, mut r: Ray) -> f32 {
     }
 }
 
-fn color(mut r: Ray) -> Vector3<f32> {
-    let t:f32 = hit_sphere(Vector3::new(0f32,0f32,-1f32), 0.5f32, r);
-    if t > 0.0f32 {
-        let N: Vector3<f32> = unit_vector(r.point_at_parameter(t) - Vector3::new(0f32,0f32,-1f32));
-        return 0.5f32*Vector3::new(N.x+1f32, N.y+1f32, N.z+1f32);
+fn color(mut r: Ray, mut list: Rc<Vec<Box<Hitable>>>) -> Vector3<f32> {
+    let mut rec = HitableRecord {
+            t: 0f32,
+            p: Vector3::new(0f32,0f32,0f32),
+            normal: Vector3::new(0f32,0f32,0f32)
+        };
+    let mut temp_rec = HitableRecord {
+        t: 0f32,
+        p: Vector3::new(0f32,0f32,0f32),
+        normal: Vector3::new(0f32,0f32,0f32)
+    };
+    let mut hit_anything: bool = false;
+    let mut closest_so_far: f32 = std::f32::MAX;
+    list.iter_mut().for_each(|h| { 
+        let temp_temp_rec: HitableRecord = temp_rec;
+        if h.hit(r, 0f32, closest_so_far, temp_temp_rec) {
+            hit_anything = true;
+            closest_so_far = temp_temp_rec.t;
+            rec = temp_temp_rec;
+        }
+    });
+    if hit_anything {
+        return 0.5f32*Vector3::new(rec.normal.x+1f32, rec.normal.y+1f32, rec.normal.z+1f32);
+    } else {
+        let unit_direction: Vector3<f32> = unit_vector(r.direction());
+        let t: f32 = 0.5f32*(unit_direction.y+1f32);
+        return (1.0f32-t)*Vector3::new(1.0f32,1.0f32,1.0f32) + t*Vector3::new(0.5f32,0.7f32,1.0f32);
     }
-    let unit_direction: Vector3<f32> = unit_vector(r.direction());
-    let t: f32 = 0.5f32*(unit_direction.y+1.0f32);
-    ((1.0f32-t)*Vector3::new(1.0f32, 1.0f32, 1.0f32)) + (t*Vector3::new(0.5f32, 0.7f32, 1.0f32))
+        
 }
 
 fn main() -> std::io::Result<()> {
@@ -48,6 +69,10 @@ fn main() -> std::io::Result<()> {
     let horizontal = Vector3::new(4.0f32, 0.0f32, 0.0f32);
     let vertical = Vector3::new(0.0f32, 2.0f32, 0.0f32);
     let origin = Vector3::new(0.0f32, 0.0f32, 0.0f32);
+
+    let mut list: Rc<Box<Vec<Hitable>>> = Rc::new(Box::new(Vec::new()));
+    list.push(Sphere::new(Vector3::new(0f32,0f32,-1f32), 0.5f32));
+    list.push(Sphere::new(Vector3::new(0f32,-100.5f32,-1f32), 0.5f32));
     while j >= 0.0 {
         let mut i: f32 = 0.0;
         while i < nx {
@@ -55,8 +80,10 @@ fn main() -> std::io::Result<()> {
             let v: f32 = j / ny;
             let uh: Vector3<f32> = u*horizontal;
             let vv: Vector3<f32> = v*vertical;
-            let r = Ray::new(origin, lower_left_corner + uh + vv);
-            let col = color(r);
+            let mut r = Ray::new(origin, lower_left_corner + uh + vv);
+
+            let p = r.point_at_parameter(2.0);
+            let col = color(r, Rc::clone(&list));
             let ir: f32 = 255.99 * col.x;
             let ig: f32 = 255.99 * col.y;
             let ib: f32 = 255.99 * col.z;
