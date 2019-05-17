@@ -15,7 +15,19 @@ fn vector_length(v: Vector3<f32>) -> f32 {
     length_squared.sqrt()
 }
 
+fn hit_sphere(center: Vector3<f32>, radius: f32, mut r: Ray) -> bool {
+    let oc = r.origin() - center;
+    let a: f32 = cgmath::dot(r.direction(), r.direction());
+    let b: f32 = 2.0f32 * cgmath::dot(oc, r.direction());
+    let c: f32 = cgmath::dot(oc, oc) - radius*radius;
+    let discriminant: f32 = b*b - 4f32*a*c;
+    discriminant > 0f32
+}
+
 fn color(mut r: Ray) -> Vector3<f32> {
+    if hit_sphere(Vector3::new(0f32, 0f32, -1f32), 0.5f32, r) {
+        return Vector3::new(1f32, 0f32, 0f32);
+    }
     let unit_direction: Vector3<f32> = unit_vector(r.direction());
     let t: f32 = 0.5f32*(unit_direction.y+1.0f32);
     ((1.0f32-t)*Vector3::new(1.0f32, 1.0f32, 1.0f32)) + (t*Vector3::new(0.5f32, 0.7f32, 1.0f32))
