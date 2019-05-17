@@ -35,19 +35,17 @@ fn color(mut r: Ray, list: &[Box<Hitable>]) -> Vector3<f32> {
             p: Vector3::new(0f32,0f32,0f32),
             normal: Vector3::new(0f32,0f32,0f32)
         };
-    let mut temp_rec = HitableRecord {
-        t: 0f32,
-        p: Vector3::new(0f32,0f32,0f32),
-        normal: Vector3::new(0f32,0f32,0f32)
-    };
     let mut hit_anything: bool = false;
-    let mut closest_so_far: f32 = std::f32::MAX;
     list.iter().for_each(|h| { 
-        let temp_temp_rec: HitableRecord = temp_rec;
-        if h.hit(r, 0f32, closest_so_far, temp_temp_rec) {
+        let mut closest_so_far: f32 = std::f32::MAX;
+        let temp_rec: HitableRecord = rec;
+        if h.hit(r, 0f32, closest_so_far, temp_rec) {
             hit_anything = true;
-            closest_so_far = temp_temp_rec.t;
-            rec = temp_temp_rec;
+            closest_so_far = temp_rec.t;
+            rec = temp_rec;
+            if rec.normal.z > 0f32 {
+                println!("{}", rec.normal.z);
+            }
         }
     });
     

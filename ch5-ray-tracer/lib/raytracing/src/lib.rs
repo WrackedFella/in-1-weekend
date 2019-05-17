@@ -65,6 +65,8 @@ impl Hitable for Sphere {
                 rec.normal = (rec.p - &self.center) / self.radius;
                 return true;
             }
+            // ToDo: Figure out why the code never gets here.
+            // println!("{}", temp);
             temp = (-b + (b*b-a*c).sqrt()) / a;
             if temp < t_max && temp > t_min {
                 rec.t = temp;
