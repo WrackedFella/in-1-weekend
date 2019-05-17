@@ -29,7 +29,7 @@ fn hit_sphere(center: Vector3<f32>, radius: f32, mut r: Ray) -> f32 {
     }
 }
 
-fn color(mut r: Ray, mut list: Rc<Vec<Box<Hitable>>>) -> Vector3<f32> {
+fn color(mut r: Ray, list: &[Box<Hitable>]) -> Vector3<f32> {
     let mut rec = HitableRecord {
             t: 0f32,
             p: Vector3::new(0f32,0f32,0f32),
@@ -42,7 +42,7 @@ fn color(mut r: Ray, mut list: Rc<Vec<Box<Hitable>>>) -> Vector3<f32> {
     };
     let mut hit_anything: bool = false;
     let mut closest_so_far: f32 = std::f32::MAX;
-    list.iter_mut().for_each(|h| { 
+    list.iter().for_each(|h| { 
         let temp_temp_rec: HitableRecord = temp_rec;
         if h.hit(r, 0f32, closest_so_far, temp_temp_rec) {
             hit_anything = true;
@@ -70,9 +70,9 @@ fn main() -> std::io::Result<()> {
     let vertical = Vector3::new(0.0f32, 2.0f32, 0.0f32);
     let origin = Vector3::new(0.0f32, 0.0f32, 0.0f32);
 
-    let mut list: Rc<Box<Vec<Hitable>>> = Rc::new(Box::new(Vec::new()));
-    list.push(Sphere::new(Vector3::new(0f32,0f32,-1f32), 0.5f32));
-    list.push(Sphere::new(Vector3::new(0f32,-100.5f32,-1f32), 0.5f32));
+    let mut list = Vec::new();
+    list.push(Box::new(Sphere::new(Vector3::new(0f32,0f32,-1f32), 0.5f32)) as Box<Hitable>);
+    list.push(Box::new(Sphere::new(Vector3::new(0f32,-100.5f32,-1f32), 0.5f32)) as Box<Hitable>);
     while j >= 0.0 {
         let mut i: f32 = 0.0;
         while i < nx {
@@ -83,7 +83,7 @@ fn main() -> std::io::Result<()> {
             let mut r = Ray::new(origin, lower_left_corner + uh + vv);
 
             let p = r.point_at_parameter(2.0);
-            let col = color(r, Rc::clone(&list));
+            let col = color(r, &list);
             let ir: f32 = 255.99 * col.x;
             let ig: f32 = 255.99 * col.y;
             let ib: f32 = 255.99 * col.z;

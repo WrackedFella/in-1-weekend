@@ -3,7 +3,7 @@ extern crate cgmath;
 use cgmath::Vector3;
 
 pub trait Hitable {
-    fn hit(&mut self, r: Ray, t_min: f32, t_max: f32, rec: HitableRecord) -> bool;
+    fn hit(&self, r: Ray, t_min: f32, t_max: f32, rec: HitableRecord) -> bool;
 }
 
 #[derive(Copy, Clone)]
@@ -51,7 +51,7 @@ impl Sphere {
 }
 
 impl Hitable for Sphere {
-    fn hit(&mut self, mut r: Ray, t_min: f32, t_max: f32, mut rec: HitableRecord) -> bool {
+    fn hit(&self, mut r: Ray, t_min: f32, t_max: f32, mut rec: HitableRecord) -> bool {
         let oc: Vector3<f32> = r.origin() - &self.center;
         let a: f32 = cgmath::dot(r.direction(), r.direction());
         let b: f32 = cgmath::dot(oc, r.direction());
