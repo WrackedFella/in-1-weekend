@@ -50,6 +50,7 @@ fn color(mut r: Ray, list: &[Box<Hitable>]) -> Vector3<f32> {
             rec = temp_temp_rec;
         }
     });
+    
     if hit_anything {
         return 0.5f32*Vector3::new(rec.normal.x+1f32, rec.normal.y+1f32, rec.normal.z+1f32);
     } else {
@@ -57,7 +58,6 @@ fn color(mut r: Ray, list: &[Box<Hitable>]) -> Vector3<f32> {
         let t: f32 = 0.5f32*(unit_direction.y+1f32);
         return (1.0f32-t)*Vector3::new(1.0f32,1.0f32,1.0f32) + t*Vector3::new(0.5f32,0.7f32,1.0f32);
     }
-        
 }
 
 fn main() -> std::io::Result<()> {
@@ -84,9 +84,9 @@ fn main() -> std::io::Result<()> {
 
             let p = r.point_at_parameter(2.0);
             let col = color(r, &list);
-            let ir: f32 = 255.99 * col.x;
-            let ig: f32 = 255.99 * col.y;
-            let ib: f32 = 255.99 * col.z;
+            let ir = (255.99 * col.x) as u8;
+            let ig = (255.99 * col.y) as u8;
+            let ib = (255.99 * col.z) as u8;
             
             file_contents = file_contents + &format!("{} {} {}\n", ir, ig, ib);
             i = i + 1.0f32;
