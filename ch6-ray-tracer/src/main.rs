@@ -2,6 +2,7 @@ extern crate raytracing;
 extern crate cgmath;
 
 use raytracing::*;
+use raytracing::actors::Sphere;
 use std::fs::File;
 use std::io::prelude::*;
 use cgmath::Vector3;
@@ -64,7 +65,6 @@ fn main() -> std::io::Result<()> {
             let mut r = Ray::new(origin, lower_left_corner + u*horizontal + v*vertical);
 
             let p = r.point_at_parameter(2.0);
-            //let col = color(r);
             let col = color(r, &world);
             let ir = (255.99 * col.x) as u8;
             let ig = (255.99 * col.y) as u8;
