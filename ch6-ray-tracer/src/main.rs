@@ -51,7 +51,6 @@ fn main() -> std::io::Result<()> {
     let nx: u8 = 200;
     let ny: u8 = 100;
     let ns: u8 = 100;
-    let mut s: u8 = 0;
 
     let mut file_contents = format!("P3\n{} {}\n255\n", nx, ny);
     
@@ -59,13 +58,11 @@ fn main() -> std::io::Result<()> {
     let s2 = Sphere::new(Vector3::new(0f32,-100.5f32,-1f32), 100f32);
     let world: Vec<&Hittable> = vec![&s1, &s2];
     let cam = Camera::new();
-
-    let mut j: u8 = ny - 1;
-    loop {
-        let mut i: u8 = 0;
-        while i < nx {
-            let mut col = Vector3::new(0f32,0f32,0f32);            
-            while s < ns {
+    for j in (1..(ny-1)).rev() {        
+        println!("test");
+        for i in 0..nx {
+            let mut col: Vector3<f32> = Vector3::new(0f32,0f32,0f32);            
+            for s in 0..ns {
                 let rand1: f32 = rand::random();
                 let rand2: f32 = rand::random();
                 
@@ -74,22 +71,14 @@ fn main() -> std::io::Result<()> {
                 let mut r = cam.get_ray(u, v);
                 let _p = r.point_at_parameter(2.0);
                 col = col + color(r, &world);
-                s = s + 1;
-                println!("{}, {}, {}", col.x, col.y, col.z); // has values
             }
-            println!("{}, {}, {}", col.x, col.y, col.z); // No values
             col = col / ns as f32;
             let ir = (255.99 * col.x) as u8;
             let ig = (255.99 * col.y) as u8;
             let ib = (255.99 * col.z) as u8;
             
             file_contents = file_contents + &format!("{} {} {}\n", ir, ig, ib);
-            i = i + 1;
         }
-        if j == 0 {
-            break;
-        }
-        j = j - 1;
     }
     
     let mut file = File::create("hello_world.ppm")?;
