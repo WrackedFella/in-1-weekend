@@ -1,0 +1,49 @@
+extern crate cgmath;
+use cgmath::Vector3;
+use crate::*;
+
+#[derive(Copy, Clone)]
+pub struct Sphere<'a> {
+    pub center: Vector3<f32>,
+    pub radius: f32,
+    pub mat_ptr: &'a (Scatterable + 'a)
+}
+
+impl<'a> Sphere<'a> {
+    pub fn new(cen: Vector3<f32>, r: f32, mat: &'a (dyn Scatterable + 'a)) -> Sphere<'a> {
+        Sphere {
+            center: cen,
+            radius: r,
+            mat_ptr: mat
+        }
+    }
+}
+
+impl<'a> Hittable for Sphere<'a> {
+    fn hit(&self, mut r: Ray, t_min: f32, t_max: f32,  rec: &mut HittableRecord) -> bool {
+        let oc: Vector3<f32> = r.origin() - &self.center;
+        let a: f32 = cgmath::dot(r.direction(), r.direction());
+        let b: f32 = cgmath::dot(oc, r.direction());
+        let c: f32 = cgmath::dot(oc, oc) - self.radius*self.radius;
+        let discriminant: f32 = b*b - a*c;
+        if discriminant > 0f32 {
+            let mut temp = (-b - (b*b-a*c).sqrt()) / a;
+            if temp < t_max && temp > t_min {
+                rec.t = temp;
+                rec.p = r.point_at_parameter(rec.t);
+                rec.normal = (rec.p - &self.center) / self.radius;
+                rec.mat_ptr = self.mat_ptr;
+                return true;
+            }
+            temp = (-b + (b*b-a*c).sqrt()) / a;
+            if temp < t_max && temp > t_min {
+                rec.t = temp;
+                rec.p = r.point_at_parameter(rec.t);
+                rec.normal = (rec.p - &self.center) / self.radius;
+                rec.mat_ptr = self.mat_ptr;
+                return true;
+            }
+        }
+        return false;
+    }
+}
