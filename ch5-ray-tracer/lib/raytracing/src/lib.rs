@@ -2,8 +2,8 @@ extern crate cgmath;
 
 use cgmath::Vector3;
 
-pub trait Hitable {
-    fn hit(&self, r: Ray, t_min: f32, t_max: f32, rec: HitableRecord) -> bool;
+pub trait Hittable {
+    fn hit(&self, r: Ray, t_min: f32, t_max: f32, rec: &mut HittableRecord) -> bool;
 }
 
 #[derive(Copy, Clone)]
@@ -13,7 +13,7 @@ pub struct Ray {
 }
 
 #[derive(Copy, Clone)]
-pub struct HitableRecord {
+pub struct HittableRecord {
     pub t: f32,
     pub p: Vector3<f32>,
     pub normal: Vector3<f32>
@@ -50,8 +50,8 @@ impl Sphere {
     }
 }
 
-impl Hitable for Sphere {
-    fn hit(&self, mut r: Ray, t_min: f32, t_max: f32, mut rec: HitableRecord) -> bool {
+impl Hittable for Sphere {
+    fn hit(&self, mut r: Ray, t_min: f32, t_max: f32,  rec: &mut HittableRecord) -> bool {
         let oc: Vector3<f32> = r.origin() - &self.center;
         let a: f32 = cgmath::dot(r.direction(), r.direction());
         let b: f32 = cgmath::dot(oc, r.direction());
@@ -65,8 +65,6 @@ impl Hitable for Sphere {
                 rec.normal = (rec.p - &self.center) / self.radius;
                 return true;
             }
-            // ToDo: Figure out why the code never gets here.
-            // println!("{}", temp);
             temp = (-b + (b*b-a*c).sqrt()) / a;
             if temp < t_max && temp > t_min {
                 rec.t = temp;
