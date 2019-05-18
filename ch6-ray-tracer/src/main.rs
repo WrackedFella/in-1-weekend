@@ -5,7 +5,7 @@ extern crate rand;
 use std::fs::File;
 use std::io::prelude::*;
 use cgmath::Vector3;
-use rand::prelude::*;
+use rand::{thread_rng, Rng};
 
 use raytracing::*;
 use raytracing::actors::Sphere;
@@ -53,21 +53,18 @@ fn main() -> std::io::Result<()> {
     let ns: u8 = 100;
 
     let mut file_contents = format!("P3\n{} {}\n255\n", nx, ny);
+    let mut rng = thread_rng();
     
     let s1 = Sphere::new(Vector3::new(0f32,0f32,-1f32), 0.5f32);
     let s2 = Sphere::new(Vector3::new(0f32,-100.5f32,-1f32), 100f32);
     let world: Vec<&Hittable> = vec![&s1, &s2];
     let cam = Camera::new();
-    for j in (1..(ny-1)).rev() {        
-        println!("test");
+    for j in (1..(ny-1)).rev() {
         for i in 0..nx {
             let mut col: Vector3<f32> = Vector3::new(0f32,0f32,0f32);            
             for s in 0..ns {
-                let rand1: f32 = rand::random();
-                let rand2: f32 = rand::random();
-                
-                let u: f32 = (rand1 * i as f32) / nx as f32;
-                let v: f32 = (rand2 * j as f32) / ny as f32;
+                let u: f32 = (rng.gen_range(0f32, 0.9f32) + i as f32) / nx as f32;
+                let v: f32 = (rng.gen_range(0f32, 0.9f32) + j as f32) / ny as f32;
                 let mut r = cam.get_ray(u, v);
                 let _p = r.point_at_parameter(2.0);
                 col = col + color(r, &world);
