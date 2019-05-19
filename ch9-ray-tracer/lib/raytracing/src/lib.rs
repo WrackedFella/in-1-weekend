@@ -8,6 +8,12 @@ pub mod actors;
 pub mod camera;
 pub mod materials;
 
+pub fn schlick(cosine: f32, ref_idx: f32) -> f32 {
+    let mut r0 = (1f32-ref_idx) / (1f32+ref_idx);
+    r0 = r0*r0;
+    return r0+(1f32-r0)*(1f32-cosine).powf(5f32);
+}
+
 pub fn refract(v: Vector3<f32>, n: Vector3<f32>, ni_over_nt: f32) -> Option<Vector3<f32>> {
     let uv = unit_vector(v);
     let dt = cgmath::dot(uv, n);
@@ -17,6 +23,10 @@ pub fn refract(v: Vector3<f32>, n: Vector3<f32>, ni_over_nt: f32) -> Option<Vect
     } else {
         return None;
     }
+}
+
+pub fn reflect(v: Vector3<f32>, n: Vector3<f32>) -> Vector3<f32> {
+    v - 2f32*cgmath::dot(v,n)*n
 }
 
 pub fn multiply_vectors(v1: Vector3<f32>, v2: Vector3<f32>) -> Vector3<f32> {
@@ -43,10 +53,6 @@ pub fn random_in_unit_sphere() -> Vector3<f32> {
         p = 2f32*Vector3::new(rng.gen::<f32>(),rng.gen::<f32>(),rng.gen::<f32>()) - Vector3::new(1f32,1f32,1f32);
     }
     return p;
-}
-
-pub fn reflect(v: Vector3<f32>, n: Vector3<f32>) -> Vector3<f32> {
-    v - 2f32*cgmath::dot(v,n)*n
 }
 
 pub trait Hittable {
