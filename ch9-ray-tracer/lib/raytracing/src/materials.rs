@@ -72,7 +72,6 @@ impl Scatterable for Dielectric {
     fn scatter(&self, mut r_in: Ray, rec: HittableRecord) -> Option<ScatterRecord> {
         let mut outward_normal = Vector3::new(0f32,0f32,0f32);
         let mut ni_over_nt = 0f32;
-        let reflected = reflect(r_in.direction(), rec.normal);
         let refracted = Vector3::new(0f32,0f32,0f32);
         if cgmath::dot(r_in.direction(), rec.normal) > 0f32 {
             outward_normal = -rec.normal;
@@ -86,13 +85,15 @@ impl Scatterable for Dielectric {
             Some(x) => {
                 Some(ScatterRecord {
                     attenuation: Vector3::new(1f32,1f32,1f32),
-                    scattered: Ray::new(rec.p, refracted)
+                    scattered: Ray::new(rec.p, x)
                 })
             },
             None => {
+                let test = Ray::new(rec.p, reflect(r_in.direction(), rec.normal));
+                println!("{} {} {}", test.a.x, test.a.y, test.a.z);
                 Some(ScatterRecord {
                     attenuation: Vector3::new(1f32,1f32,1f32),
-                    scattered: Ray::new(rec.p, reflected)
+                    scattered: test
                 })
             }
         }
