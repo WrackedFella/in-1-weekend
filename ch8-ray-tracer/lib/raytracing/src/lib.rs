@@ -31,7 +31,6 @@ pub fn random_in_unit_sphere() -> Vector3<f32> {
     while vector_length_squared(p) >= 1.0 {
         p = 2f32*Vector3::new(rng.gen::<f32>(),rng.gen::<f32>(),rng.gen::<f32>()) - Vector3::new(1f32,1f32,1f32);
     }
-    //println!("{} {} {}", p.x, p.y, p.z);
     return p;
 }
 

@@ -69,14 +69,12 @@ fn color(mut r: Ray, world: &[&Hittable], depth: i16) -> Vector3<f32> {
             None => {
             }
         };
-        //println!("{} {} {}", result.x, result.y, result.z);
     });
     if hit_anything {
         let scatter_test = rec.mat_ptr.scatter(r, rec);
         match scatter_test {
             Some(x) => {
                 if depth < 500 {
-                    // println!("{} {} {}", attentuation.x, attentuation.y, attentuation.z);
                     return multiply_vectors(x.attenuation,color(x.scattered, world, depth+1));
                 }
             },
@@ -102,8 +100,8 @@ fn main() -> std::io::Result<()> {
 
     let m1 = Lambertian::new(Vector3::new(0.8f32,0.3f32,0.3f32));
     let m2 = Lambertian::new(Vector3::new(0.8f32,0.8f32,0.0f32));
-    let m3 = Metal::new(Vector3::new(0.8f32,0.6f32,0.2f32));
-    let m4 = Metal::new(Vector3::new(0.8f32,0.8f32,0.8f32));
+    let m3 = Metal::new(Vector3::new(0.8f32,0.6f32,0.2f32), 1f32);
+    let m4 = Metal::new(Vector3::new(0.8f32,0.8f32,0.8f32), 0.3f32);
 
     let s1 = Sphere::new(Vector3::new(0f32,0f32,-1f32), 0.5f32, &m1);
     let s2 = Sphere::new(Vector3::new(0f32,-100.5f32,-1f32), 100f32, &m2);

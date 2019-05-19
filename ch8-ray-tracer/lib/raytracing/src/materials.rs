@@ -27,13 +27,15 @@ impl Scatterable for Lambertian {
 
 #[derive(Copy, Clone)]
 pub struct Metal {
-    pub albedo: Vector3<f32>
+    pub albedo: Vector3<f32>,
+    pub fuzz: f32
 }
 
 impl Metal {
-    pub fn new(a: Vector3<f32>) -> Metal {
+    pub fn new(a: Vector3<f32>, f: f32) -> Metal {
         Metal {
-            albedo: a
+            albedo: a,
+            fuzz: f
         }
     }
 }
@@ -41,13 +43,11 @@ impl Metal {
 impl Scatterable for Metal {
     fn scatter(&self, mut r_in: Ray, rec: HittableRecord) -> Option<ScatterData> {
         let reflected: Vector3<f32> = reflect(unit_vector(r_in.direction()), rec.normal);
-        let a = self.albedo;
-        let mut s = Ray::new(rec.p, reflected);
+        let mut s = Ray::new(rec.p, reflected+self.fuzz*random_in_unit_sphere());
         let x = cgmath::dot(s.direction(), rec.normal);
-        //println!("{}", x);
         if x > 0f32 {
             return Some(ScatterData {
-                attenuation: a,
+                attenuation: self.albedo,
                 scattered: s
             });
         }
