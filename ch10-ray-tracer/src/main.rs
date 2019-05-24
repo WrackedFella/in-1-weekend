@@ -21,7 +21,6 @@ fn color(mut r: Ray, world: &[&Hittable], depth: i16) -> Vector3<f32> {
         };
     let mut hit_anything: bool = false;
     let mut closest_so_far: f32 = std::f32::MAX;
-    let mut result = Vector3::new(0f32,0f32,0f32);
     
     world.iter().for_each(|h| { 
         let hit_test = h.hit(r, 0.001f32, closest_so_far);
@@ -52,7 +51,6 @@ fn color(mut r: Ray, world: &[&Hittable], depth: i16) -> Vector3<f32> {
         let t: f32 = 0.5f32*(unit_direction.y+1f32);
         return (1.0f32-t)*Vector3::new(1.0f32,1.0f32,1.0f32) + t*Vector3::new(0.5f32,0.7f32,1.0f32);
     }
-    return result;
 }
 
 fn main() -> std::io::Result<()> {
@@ -63,11 +61,16 @@ fn main() -> std::io::Result<()> {
     let mut file_contents = format!("P3\n{} {}\n255\n", nx, ny);
     let mut rng = thread_rng();
 
+    // let m1 = Lambertian::new(Vector3::new(0f32,0f32,1f32));
+    // let m2 = Lambertian::new(Vector3::new(1f32,0f32,0f32));
     let m1 = Lambertian::new(Vector3::new(0.8f32,0.3f32,0.3f32));
     let m2 = Lambertian::new(Vector3::new(0.8f32,0.8f32,0.0f32));
     let m3 = Metal::new(Vector3::new(0.8f32,0.6f32,0.2f32), 1f32);
     let m4 = Dielectric::new(1.5f32);
 
+    // let r = (std::f32::consts::PI / 4f32).cos();
+    // let s1 = Sphere::new(Vector3::new(-r,0f32,-1f32), r, &m1);
+    // let s2 = Sphere::new(Vector3::new(r,0f32,-1f32), r, &m2);
     let s1 = Sphere::new(Vector3::new(0f32,0f32,-1f32), 0.5f32, &m1);
     let s2 = Sphere::new(Vector3::new(0f32,-100.5f32,-1f32), 100f32, &m2);
     let s3 = Sphere::new(Vector3::new(1f32,0f32,-1f32), 0.5f32, &m3);
@@ -75,8 +78,13 @@ fn main() -> std::io::Result<()> {
     let s5 = Sphere::new(Vector3::new(-1f32,0f32,-1f32), -0.45f32, &m4);
 
     let world: Vec<&Hittable> = vec![&s1, &s2, &s3, &s4, &s5];
+    //let world: Vec<&Hittable> = vec![&s1, &s2];
 
-    let cam = Camera::new();
+    let cam = Camera::new(
+        Vector3::new(-2f32,2f32,1f32),
+        Vector3::new(0f32,0f32,-1f32),
+        Vector3::new(0f32,1f32,0f32),
+        90f32, nx as f32 / ny as f32);
     for j in (1..(ny-1)).rev() {
         for i in 0..nx {
             let mut col: Vector3<f32> = Vector3::new(0f32,0f32,0f32);            

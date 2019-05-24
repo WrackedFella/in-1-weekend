@@ -8,6 +8,7 @@ pub mod actors;
 pub mod camera;
 pub mod materials;
 
+// Reflection function
 pub fn schlick(cosine: f32, ref_idx: f32) -> f32 {
     let mut r0 = (1f32-ref_idx) / (1f32+ref_idx);
     r0 = r0*r0;
