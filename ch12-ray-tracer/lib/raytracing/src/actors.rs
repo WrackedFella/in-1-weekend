@@ -3,14 +3,14 @@ use cgmath::Vector3;
 use crate::*;
 
 #[derive(Copy, Clone)]
-pub struct Sphere<'a> {
+pub struct Sphere {
     pub center: Vector3<f32>,
     pub radius: f32,
-    pub mat_ptr: &'a (Scatterable + 'a)
+    pub mat_ptr: MaterialType
 }
 
-impl<'a> Sphere<'a> {
-    pub fn new(cen: Vector3<f32>, r: f32, mat: &'a (dyn Scatterable + 'a)) -> Sphere<'a> {
+impl Sphere {
+    pub fn new(cen: Vector3<f32>, r: f32, mat: MaterialType) -> Sphere {
         Sphere {
             center: cen,
             radius: r,
@@ -19,7 +19,7 @@ impl<'a> Sphere<'a> {
     }
 }
 
-impl<'a> Hittable for Sphere<'a> {
+impl Hittable for Sphere {
     fn hit<'b>(&self, mut r: Ray, t_min: f32, t_max: f32) -> Option<HittableRecord> {
         let oc: Vector3<f32> = r.origin() - &self.center;
         let a: f32 = cgmath::dot(r.direction(), r.direction());
@@ -52,7 +52,7 @@ impl<'a> Hittable for Sphere<'a> {
     }
 }
 
-// impl<'a> Hittable for Sphere<'a> {
+// impl Hittable for Sphere {
 //     fn hit<'b>(&'b self, mut r: Ray, t_min: f32, t_max: f32,  rec: &mut HittableRecord) -> bool {
 //         let oc: Vector3<f32> = r.origin() - &self.center;
 //         let a: f32 = cgmath::dot(r.direction(), r.direction());

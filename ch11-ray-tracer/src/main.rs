@@ -61,16 +61,11 @@ fn main() -> std::io::Result<()> {
     let mut file_contents = format!("P3\n{} {}\n255\n", nx, ny);
     let mut rng = thread_rng();
 
-    // let m1 = Lambertian::new(Vector3::new(0f32,0f32,1f32));
-    // let m2 = Lambertian::new(Vector3::new(1f32,0f32,0f32));
     let m1 = Lambertian::new(Vector3::new(0.8f32,0.3f32,0.3f32));
     let m2 = Lambertian::new(Vector3::new(0.8f32,0.8f32,0.0f32));
     let m3 = Metal::new(Vector3::new(0.8f32,0.6f32,0.2f32), 1f32);
     let m4 = Dielectric::new(1.5f32);
 
-    // let r = (std::f32::consts::PI / 4f32).cos();
-    // let s1 = Sphere::new(Vector3::new(-r,0f32,-1f32), r, &m1);
-    // let s2 = Sphere::new(Vector3::new(r,0f32,-1f32), r, &m2);
     let s1 = Sphere::new(Vector3::new(0f32,0f32,-1f32), 0.5f32, &m1);
     let s2 = Sphere::new(Vector3::new(0f32,-100.5f32,-1f32), 100f32, &m2);
     let s3 = Sphere::new(Vector3::new(1f32,0f32,-1f32), 0.5f32, &m3);
@@ -78,7 +73,6 @@ fn main() -> std::io::Result<()> {
     let s5 = Sphere::new(Vector3::new(-1f32,0f32,-1f32), -0.45f32, &m4);
 
     let world: Vec<&Hittable> = vec![&s1, &s2, &s3, &s4, &s5];
-    //let world: Vec<&Hittable> = vec![&s1, &s2];
 
     let look_from = Vector3::new(3f32,3f32,2f32);
     let look_at = Vector3::new(0f32,0f32,-1f32);

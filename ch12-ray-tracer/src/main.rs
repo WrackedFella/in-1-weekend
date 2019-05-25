@@ -10,49 +10,13 @@ use rand::{thread_rng, Rng};
 use raytracing::*;
 use raytracing::actors::Sphere;
 use raytracing::camera::Camera;
-use raytracing::materials::*;
 
-fn random_scene() -> Vec<&'static Hittable> {
-    let mut rng = thread_rng();
-    let n = 500f32;
-    let mut world: Vec<&Hittable> = Vec::new();
-    let m = Lambertian::new(Vector3::new(0.5f32,0.5f32,0.5f32));
-    let sphere = Sphere::new(Vector3::new(0f32,-1000f32,0f32).to_owned(), 1000f32, &m);
-    world.push(&sphere.clone());
-    for a in -11..11 {
-        for b in -11..11 {
-            let choose_mat = rng.gen::<f32>();
-            let center = Vector3::new(a as f32 +0.9f32*rng.gen::<f32>(),0.2f32,b as f32 +0.9f32*rng.gen::<f32>());
-            if vector_length(center-Vector3::new(4f32,0.2f32,0f32)) > 0.9f32 {
-                if choose_mat < 0.8f32 { // diffuse
-                    let mat = Lambertian::new(Vector3::new(rng.gen::<f32>()*rng.gen::<f32>(), rng.gen::<f32>()*rng.gen::<f32>(), rng.gen::<f32>()*rng.gen::<f32>()));
-                    let sphere = &Sphere::new(center, 0.2f32, &mat);
-                    world.push(&sphere.to_owned());
-                } else if choose_mat < 0.95f32 { // metal
-                    let mat = Metal::new(
-                        Vector3::new(0.5f32*(1f32+rng.gen::<f32>()), 
-                            0.5f32*(1f32+rng.gen::<f32>()), 
-                            0.5f32*(1f32+rng.gen::<f32>())
-                        ), 0.5f32*rng.gen::<f32>());
-                    let sphere = &Sphere::new(center, 0.2f32, &mat);
-                    world.push(&sphere.to_owned());
-                } else { // glass
-                    let mat = Dielectric::new(1.5f32);
-                    let sphere = &Sphere::new(center, 0.2f32, &mat);
-                    world.push(&sphere.to_owned());
-                }
-            }
-        }
-    }
-    return world;
-}
-
-fn color(mut r: Ray, world: &[&Hittable], depth: i16) -> Vector3<f32> {
+fn color(mut r: Ray, world: &[Box<Hittable>], depth: i16) -> Vector3<f32> {
     let mut rec = HittableRecord {
             t: 0f32,
             p: Vector3::new(0f32,0f32,0f32),
             normal: Vector3::new(0f32,0f32,0f32),
-            mat_ptr: &Lambertian::new(Vector3::new(0f32,0f32,0f32))
+            mat_ptr: MaterialType::Lambertian { albedo: Vector3::new(0f32,0f32,0f32) }
         };
     let mut hit_anything: bool = false;
     let mut closest_so_far: f32 = std::f32::MAX;
@@ -88,40 +52,63 @@ fn color(mut r: Ray, world: &[&Hittable], depth: i16) -> Vector3<f32> {
     }
 }
 
+fn random_scene() -> Vec<Box<Hittable>> {
+    let mut rng = thread_rng();
+    let mut world: Vec<Box<dyn Hittable>> = Vec::new();
+    let sphere = Sphere::new(Vector3::new(0f32,-1000f32,0f32).to_owned(), 1000f32, MaterialType::Lambertian { albedo: Vector3::new(0.5f32,0.5f32,0.5f32) });
+    world.push(Box::new(sphere));
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_mat = rng.gen::<f32>();
+            let center = Vector3::new(a as f32 +0.9f32*rng.gen::<f32>(),0.2f32,b as f32 +0.9f32*rng.gen::<f32>());
+            if vector_length(center-Vector3::new(4f32,0.2f32,0f32)) > 0.9f32 {
+                if choose_mat < 0.8f32 { // diffuse
+                    let sphere = Sphere::new(center, 0.2f32, 
+                        MaterialType::Lambertian { albedo: Vector3::new(rng.gen::<f32>()*rng.gen::<f32>(), rng.gen::<f32>()*rng.gen::<f32>(), rng.gen::<f32>()*rng.gen::<f32>()) });
+                    world.push(Box::new(sphere));
+                } else if choose_mat < 0.95f32 { // metal
+                    let sphere = Sphere::new(center, 0.2f32, 
+                        MaterialType::Metal { 
+                            albedo: Vector3::new(0.5f32*(1f32+rng.gen::<f32>()), 0.5f32*(1f32+rng.gen::<f32>()), 0.5f32*(1f32+rng.gen::<f32>())), 
+                            fuzz: 0.5f32*rng.gen::<f32>()
+                        });
+                    world.push(Box::new(sphere));
+                } else { // glass
+                    let sphere = Sphere::new(center, 0.2f32, MaterialType::Dielectric { ref_indx: 1.5f32 });
+                    world.push(Box::new(sphere));
+                }
+            }
+        }
+    }
+    world.push(Box::new(Sphere::new(Vector3::new(0f32, 1f32, 0f32), 1f32, MaterialType::Dielectric { ref_indx: 1.5f32 })));
+    world.push(Box::new(Sphere::new(Vector3::new(-4f32, 1f32, 0f32), 1f32, MaterialType::Lambertian { albedo: Vector3::new(0.4f32, 0.2f32, 0.1f32) })));
+    world.push(Box::new(Sphere::new(Vector3::new(4f32, 1f32, 0f32), 1f32, MaterialType::Metal { albedo: Vector3::new(0.7f32, 0.6f32, 0.5f32), fuzz: 0.0f32 })));
+    println!("World Generated");
+    return world;
+}
+
 fn main() -> std::io::Result<()> {
-    let nx: u8 = 200;
-    let ny: u8 = 100;
-    let ns: u8 = 100;
+    let nx: u32 = 1200;
+    let ny: u32 = 800;
+    let ns: u32 = 10;
 
     let mut file_contents = format!("P3\n{} {}\n255\n", nx, ny);
     let mut rng = thread_rng();
 
-    let mut world: Vec<&Hittable> = random_scene();
+    let world: Vec<Box<Hittable>> = random_scene();
+    // let s1 = Box::new(Sphere::new(Vector3::new(0f32,0f32,-1f32), 0.5f32, MaterialType::Lambertian { albedo: Vector3::new(0.8f32,0.3f32,0.3f32) }));
+    // let s2 = Box::new(Sphere::new(Vector3::new(0f32,-100.5f32,-1f32), 100f32, MaterialType::Lambertian { albedo: Vector3::new(0.8f32,0.8f32,0.0f32) }));
+    // let s3 = Box::new(Sphere::new(Vector3::new(1f32,0f32,-1f32), 0.5f32, MaterialType::Metal { albedo: Vector3::new(0.8f32,0.6f32,0.2f32), fuzz: 1f32 }));
+    // let s4 = Box::new(Sphere::new(Vector3::new(-1f32,0f32,-1f32), 0.5f32, MaterialType::Dielectric { ref_indx: 1.5f32 }));
+    // let s5 = Sphere::new(Vector3::new(-1f32,0f32,-1f32), -0.45f32, MaterialType::Dielectric { ref_indx: 1.5f32 });
+    // let world: Vec<Box<Hittable>> = vec![s1, s2, s3, s4 ]; //, &s5];
 
-    // // let m1 = Lambertian::new(Vector3::new(0f32,0f32,1f32));
-    // // let m2 = Lambertian::new(Vector3::new(1f32,0f32,0f32));
-    // let m1 = Lambertian::new(Vector3::new(0.8f32,0.3f32,0.3f32));
-    // let m2 = Lambertian::new(Vector3::new(0.8f32,0.8f32,0.0f32));
-    // let m3 = Metal::new(Vector3::new(0.8f32,0.6f32,0.2f32), 1f32);
-    // let m4 = Dielectric::new(1.5f32);
-
-    // // let r = (std::f32::consts::PI / 4f32).cos();
-    // // let s1 = Sphere::new(Vector3::new(-r,0f32,-1f32), r, &m1);
-    // // let s2 = Sphere::new(Vector3::new(r,0f32,-1f32), r, &m2);
-    // let s1 = Sphere::new(Vector3::new(0f32,0f32,-1f32), 0.5f32, &m1);
-    // let s2 = Sphere::new(Vector3::new(0f32,-100.5f32,-1f32), 100f32, &m2);
-    // let s3 = Sphere::new(Vector3::new(1f32,0f32,-1f32), 0.5f32, &m3);
-    // let s4 = Sphere::new(Vector3::new(-1f32,0f32,-1f32), 0.5f32, &m4);
-    // let s5 = Sphere::new(Vector3::new(-1f32,0f32,-1f32), -0.45f32, &m4);
-
-    // let world: Vec<&Hittable> = vec![&s1, &s2, &s3, &s4, &s5];
-    //let world: Vec<&Hittable> = vec![&s1, &s2];
-    
-    let look_from = Vector3::new(3f32,3f32,2f32);
-    let look_at = Vector3::new(0f32,0f32,-1f32);
-    let dist_to_focus = vector_length(look_from-look_at);
-    let aperture = 2f32;
+    let look_from = Vector3::new(13f32,2f32,3f32);
+    let look_at = Vector3::new(0f32,0f32,0f32);
+    let dist_to_focus = 10f32;// vector_length(look_from-look_at);
+    let aperture = 0.1f32;
     let cam = Camera::new(look_from,look_at,Vector3::new(0f32,1f32,0f32),20f32, nx as f32 / ny as f32, aperture, dist_to_focus);
+    println!("Starting loops");
     for j in (1..(ny-1)).rev() {
         for i in 0..nx {
             let mut col: Vector3<f32> = Vector3::new(0f32,0f32,0f32);            
@@ -142,6 +129,7 @@ fn main() -> std::io::Result<()> {
         }
     }
     
+    println!("Saving File");
     let mut file = File::create("hello_world.ppm")?;
     file.write_all(file_contents.as_bytes())?;
     Ok(())
